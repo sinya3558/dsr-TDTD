@@ -1,17 +1,22 @@
 # DSR-Project2
 
+## 1. Project Overview
+- 
+
+
+
+
 ## 📁 프로젝트 디렉토리 구조
 
 ```text
-dsr-TDTD/                   # DOOSAN ROBOTICS PROJECT 2
-├── CV/                     # Computer Vision Code
+dsr-TDTD/                       # DOOSAN ROBOTICS PROJECT 2
+├── Object_Detection/           # Computer Vision 
 │   ├── Hand-Detection/
 │   └── Bottle-Detection/
 │
-├── ROS/                    # ROS2 Code
+├── Robot_Control/              # ROS2 Code
 │   └── Action/
 │
-└── VOICE/
-    ├── STT/
-    └── TTS/
+└── Voice_Processing/           # STT
+
 ```

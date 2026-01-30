@@ -1,0 +1,16 @@
+# 깃허브에 안들어갈 애들(테스트 노드)
+test_pkg
+
+# datasets
+Object_Detection/Bottle-Detection/Bottle
+Object_Detection/Bottle-Detection/Plastic_Bottle_Image_Dataset
+
+# output_from_model
+Object_Detection/Bottle-Detection/TRAINED_OUTPUT/
+
+# ultralytics model
+Object_Detection/Bottle-Detection/yolo26n.pt
+Object_Detection/Bottle-Detection/yolov8n.pt
+
+# .env file
+.vscode
