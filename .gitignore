@@ -14,3 +14,4 @@ Object_Detection/Bottle-Detection/yolov8n.pt
 
 # .env file
 .vscode
+.env
