@@ -38,6 +38,8 @@ class WakeupWord:
             outputs = self.model.predict(audio_resampled)
             confidence = outputs.get(self.model_name, 0)
 
+            # test print()
+            # print(np.max(np.abs(audio_chunk)))
             # 로그 출력 (변화 감지용)
             if confidence > 0.0001:
                 print(f"Confidence: {confidence:.4f}")
@@ -49,6 +51,7 @@ class WakeupWord:
         except Exception as e:
             print(f"Error: {e}")
         return False
+    
     def set_stream(self, stream):
         self.model = Model(wakeword_models=[MODEL_PATH])
         self.stream = stream

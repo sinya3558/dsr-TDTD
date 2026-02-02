@@ -24,7 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'main = Robot_Control.main_controller:main',
-            'main_old = Robot_Control.main_controller_old:main',
+            'main_old = Robot_Control.main_controller_origin:main',
         ],
     },
 )

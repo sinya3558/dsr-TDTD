@@ -53,7 +53,8 @@ class MainController(Node):
         # 1. 초기화
         self.mic = MicController()
         self.mic.open_stream()
-        self.detector = WakeupWord(buffer_size=3840)  
+        target_size = 1280 * (self.mic.config.fs // 16000)
+        self.detector = WakeupWord(buffer_size= target_size)  
         self.detector.set_stream(self.mic.stream)
         self.stt = STT(api_key)                    
         self.keyword_extractor = GetKeyword()
