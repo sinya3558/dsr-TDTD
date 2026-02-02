@@ -21,7 +21,7 @@ from voice_processing.stt import STT
 
 ############ Package Path & Environment Setting ############
 current_dir = os.getcwd()
-package_path = get_package_share_directory("pick_and_place_voice")
+package_path = get_package_share_directory("Voice_Processing")
 
 is_laod = load_dotenv(dotenv_path=os.path.join(f"{package_path}/resource/.env"))
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -42,40 +42,46 @@ class GetKeyword(Node):
         )
 
         prompt_content = """
-            당신은 사용자의 문장에서 특정 도구와 목적지를 추출해야 합니다.
+            당신은 사용자의 문장에서 특정 객체와 목적지를 추출해야 합니다.
 
             <목표>
-            - 문장에서 다음 리스트에 포함된 도구를 최대한 정확히 추출하세요.
-            - 문장에 등장하는 도구의 목적지(어디로 옮기라고 했는지)도 함께 추출하세요.
+            - 문장에서 다음 리스트에 포함된 객체를 최대한 정확히 추출하세요.
+            - 문장에 등장하는 객체의 목적지(어디로 옮기라고 했는지)도 함께 추출하세요.
 
-            <도구 리스트>
-            - hammer, screwdriver, wrench, pos1, pos2, pos3
+            <객체 리스트>
+            - 페트병, 병뚜껑, pos1, pos2, pos3
 
             <출력 형식>
-            - 다음 형식을 반드시 따르세요: [도구1 도구2 ... / pos1 pos2 ...]
-            - 도구와 위치는 각각 공백으로 구분
-            - 도구가 없으면 앞쪽은 공백 없이 비우고, 목적지가 없으면 '/' 뒤는 공백 없이 비웁니다.
-            - 도구와 목적지의 순서는 등장 순서를 따릅니다.
+            - 다음 형식을 반드시 따르세요: [객체1 객체2 ... / pos1 pos2 ...]
+            - 객체와 위치는 각각 공백으로 구분
+            - 객체가 없으면 앞쪽은 공백 없이 비우고, 목적지가 없으면 '/' 뒤는 공백 없이 비웁니다.
+            - 객체와 목적지의 순서는 등장 순서를 따릅니다.
 
             <특수 규칙>
-            - 명확한 도구 명칭이 없지만 문맥상 유추 가능한 경우(예: "못 박는 것" → hammer)는 리스트 내 항목으로 최대한 추론해 반환하세요.
-            - 다수의 도구와 목적지가 동시에 등장할 경우 각각에 대해 정확히 매칭하여 순서대로 출력하세요.
+            - 명확한 객체 명칭이 없지만 문맥상 유추 가능한 경우(예: "재활용 또는 분리수거" → 페트병)는 리스트 내 항목으로 최대한 추론해 반환하세요.
+            - 다수의 객체와 목적지가 동시에 등장할 경우 각각에 대해 정확히 매칭하여 순서대로 출력하세요.
 
             <예시>
-            - 입력: "hammer를 pos1에 가져다 놔"  
-            출력: hammer / pos1
+            - 입력: "분리수거 시작"  
+            출력: bottle / 
 
-            - 입력: "왼쪽에 있는 해머와 wrench를 pos1에 넣어줘"  
-            출력: hammer wrench / pos1
+            - 입력: "페트병을 pos1에 가져다 놔"  
+            출력: bottle / pos1
 
-            - 입력: "왼쪽에 있는 hammer를줘"  
-            출력: hammer /
+            - 입력: "페트병을 재활용해"  
+            출력: bottle
 
-            - 입력: "왼쪽에 있는 못 박을 수 있는것을 줘"  
-            출력: hammer /
+            - 입력: "병뚜껑 색상을 구분해서 pos2 또는 pos3 에 넣어줘"  
+            출력: 병뚜껑 색 / pos2 pos3
 
-            - 입력: "hammer는 pos2에 두고 screwdriver는 pos1에 둬"  
-            출력: hammer screwdriver / pos2 pos1
+            - 입력: "물이 많이 남았으면 나에게 돌려줘"  
+            출력: 물 50% 이상 / hand_pos
+
+            - 입력: "페트병 내 손위에 올려줘"  
+            출력: bottle / hand_pos
+
+            - 입력: "유색병뚜껑은 pos3에 두고 무색병뚜껑은 pos2에 둬"  
+            출력: 유색병뚜껑 무색병뚜껑 / pos3 pos2
 
             <사용자 입력>
             "{user_input}"                
