@@ -31,7 +31,7 @@ class WakeupWord:
             audio_resampled = resample(audio_chunk, num_samples)
             
             # 3. 데이터 정제 (float 변환 후 다시 int16으로)
-            audio_resampled = np.clip(audio_resampled, -32768, 32767).astype(np.int16)
+            audio_resampled = audio_chunk[::3].astype(np.int16)
 
             # 4. 모델 예측
             # 만약 학습된 모델이 특수한 경우, predict_clip을 써보는 것도 방법입니다.
