@@ -131,7 +131,7 @@ class GetKeyword(Node):
         print(f"llm's response: {object}")
         print(f"object: {object}")
         print(f"target: {target}")
-        return object
+        return object, target   # add target!!!!!!!
     
     def get_keyword(self, request, response):  # 요청과 응답 객체를 받아야 함
         try:
