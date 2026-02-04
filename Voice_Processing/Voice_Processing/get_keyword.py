@@ -65,6 +65,9 @@ class GetKeyword(Node):
             - 입력: "분리수거 시작"  
             출력: bottle / 
 
+            - 입력: "분리수거 해줘"  
+            출력: bottle / pos1
+
             - 입력: "페트병을 pos1에 가져다 놔"  
             출력: bottle / pos1
 

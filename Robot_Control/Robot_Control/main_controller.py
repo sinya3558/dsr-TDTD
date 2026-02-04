@@ -80,10 +80,10 @@ class MainController(Node):
                 # 단계 2: 녹음 및 STT
                 # 호출어를 들었으니, 이제 5초간 녹음하여 파일로 만듭니다.
                 self.mic.record_audio()
-                wav_data = self.mic.get_wav_data()
+                # wav_data = self.mic.get_wav_data()
 
                 # 단계 2-1: STT (음성을 텍스트로 변환)
-                user_speech = self.stt.speech2text(wav_data)
+                user_speech = self.stt.speech2text()
                 self.get_logger().info(f"인식된 문장: {user_speech}")
 
                 if user_speech:

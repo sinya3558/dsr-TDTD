@@ -31,6 +31,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            "yolo = Object_Detection.yolo:main",
+            "detection = Object_Detection.detection:main",
+            "check_model = Object_Detection.check_model:main",
         ],
     },
 )
