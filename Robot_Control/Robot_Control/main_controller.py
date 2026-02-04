@@ -66,6 +66,16 @@ class MainController(Node):
         time.sleep(2.0)
         self.get_logger().info("=== 시스템 시작: 'Hello Rokey'를 말해보세요 ===")
         
+        position_map = {
+            "pos1": [607.81, -155.19, 350.52, 91.42, 92.53, 88.92], # pos_up1
+            
+        }
+
+        '''
+        POS_GRASP = [607.81, -155.19, 155.52, 91.42, 92.53, 88.92]
+        POS_UP1   = [607.81, -155.19, 350.52, 91.42, 92.53, 88.92]
+        '''
+
         while rclpy.ok():
             # 단계 1: Wakeup Word 대기
             # wakeup_word.py의 구조에 따라 is_wakeup() 혹은 __call__을 사용하세요.
@@ -88,8 +98,9 @@ class MainController(Node):
 
                 if user_speech:
                     # 단계 2-2: GetKeyword의 extract_keyword 메서드를 호출하여 리스트 추출
-                    # "bottle을 pos1에 둬" -> ['bottle'] 반환
+                    # "bottle을 pos1에 둬" -> ['bottle', 'pos1'] 반환
                     target_list = self.keyword_extractor.extract_keyword(user_speech)
+                    # objects, targets = self.keyword_extractor.extract_keyword(user_speech)
                     
                     if target_list and len(target_list) > 0:
                         target_name = target_list[0] # 첫 번째 타겟 물체 선택
@@ -109,7 +120,18 @@ class MainController(Node):
                             target_pose = self.img_node.pixel_to_robot_coords(box) 
                             
                             # robot_control.py에 정의된 로직 호출
+                            self.get_logger().info("집기 시작")
                             self.robot.pick_up(target_pose)
+
+                            time.sleep(0.5)
+                            
+                            # 단계 5: place
+                            place_pose = position_map["pos1"]   # test
+                            self.get_logger().info(f"{target_list[1]} 위치로 이동")
+                            self.robot.move_to(place_pose)
+
+                            self.robot.release()
+                            ##
                             
                             self.get_logger().info("작업 완료! 다시 대기합니다.")
                         else:

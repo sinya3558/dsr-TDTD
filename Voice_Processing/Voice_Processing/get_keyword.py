@@ -121,17 +121,29 @@ class GetKeyword(Node):
 
     def extract_keyword(self, output_message):
         response = self.lang_chain.invoke({"user_input": output_message})
-        result = response.content
+        result = response.content.strip()
 
         object, target = result.strip().split("/")
 
-        object = object.split()
-        target = target.split()
+        object = object.strip().split()
+        target = target.strip().split()
+
+        matching_table = {
+            "페트병": "bottle",
+            "병": "bottle",
+            "바틀": "bottle",
+            "플라스틱병" : "bottle",
+        }
+
+        matched_object = []
+
+        for obj in object:
+            matched_object.append(matching_table.get(obj, obj))
 
         print(f"llm's response: {object}")
         print(f"object: {object}")
         print(f"target: {target}")
-        return object, target   # add target!!!!!!!
+        return matched_object, target   # add target!!!!!!!
     
     def get_keyword(self, request, response):  # 요청과 응답 객체를 받아야 함
         try:
@@ -148,13 +160,16 @@ class GetKeyword(Node):
 
         # STT --> Keword Extract --> Embedding
         output_message = self.stt.speech2text()
-        keyword = self.extract_keyword(output_message)
+        keyword, target = self.extract_keyword(output_message)
 
-        self.get_logger().warn(f"Detected tools: {keyword}")
+        self.get_logger().warn(f"Detected keyword: {keyword}")
+        self.get_logger().warn(f"Detected target: {target}")
 
         # 응답 객체 설정
         response.success = True
-        response.message = " ".join(keyword)  # 감지된 키워드를 응답 메시지로 반환
+        # response.message = " ".join(keyword)  # 감지된 키워드를 응답 메시지로 반환    ## 주석처리
+        response.message = f"{' '.join(keyword)}/{ ' '.join(target)}"           ## 추가함
+
         return response
 
 
