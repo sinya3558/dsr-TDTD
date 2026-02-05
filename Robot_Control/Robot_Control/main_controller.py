@@ -38,7 +38,6 @@ class MainController(Node):
                     api_key = os.getenv('OPENAI_API_KEY')
                     self.get_logger().info(f".env 로드 성공: {env_path}")
                 else:
-                    # [추가] install에 없으면 src 폴더 경로에서 직접 시도 (개발용)
                     src_env_path = os.path.expanduser("~/cobot_ws/src/dsr-TDTD/Voice_Processing/resource/.env")
                     load_dotenv(src_env_path)
                     api_key = os.getenv('OPENAI_API_KEY')
@@ -49,7 +48,7 @@ class MainController(Node):
         # 2. 키 검증 및 객체 생성
         if not api_key:
             self.get_logger().error("CRITICAL: API 키를 찾을 수 없습니다!")
-            raise RuntimeError("API 키가 없음.")
+            raise RuntimeError("OPEN AI API 키가 없음.")
         
         # 1. 초기화
         self.mic = MicController()
@@ -59,8 +58,15 @@ class MainController(Node):
         self.stt = STT(api_key)                    
         self.keyword_extractor = GetKeyword()
         self.yolo = YoloModel()                # 객체 탐지
-        self.img_node = ImgNode()               # 카메라 데이터
+        self.img_node = ImgNode()              # 카메라 데이터
         self.robot = RobotController()         # 로봇 컨트롤
+        self.depth_client = self.create_client(
+            SrvDepthPosition,
+            'get_3d_position'
+        )                                       # Object Detection
+        while not self.depth_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info("Waiting for object detection service...")
+
         
 
     def process(self):
@@ -119,6 +125,7 @@ class MainController(Node):
                         # 단계 3: YOLO 객체 탐지
                         # rclpy.spin_once를 통해 카메라 노드 데이터 갱신
                         rclpy.spin_once(self.img_node, timeout_sec=0.1)
+                        
                         box, score = self.yolo.get_best_detection(self.img_node, target_name)
                         
                         if box:
@@ -136,7 +143,7 @@ class MainController(Node):
                             time.sleep(0.5)
 
                             if target_pos not in position_map:
-                                self.get_logger().warn(f"{target_pos} 위치 정보 없음 → pos1 사용")
+                                self.get_logger().warn(f"{target_pos} 위치 정보가 없음 → pos1 사용")
                                 target_pos = "pos1"
                             
                             # 단계 5: place
@@ -179,6 +186,8 @@ def main(args=None):
     # 멀티 데이터 처리용
     executor = MultiThreadedExecutor()
     executor.add_node(node)
+    executor.add_node(node.img_node)
+    executor.add_node(node.robot)
 
     if hasattr(node, 'img_node'):
         executor.add_node(node.img_node)
