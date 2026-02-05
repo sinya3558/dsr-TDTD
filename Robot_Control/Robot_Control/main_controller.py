@@ -16,6 +16,7 @@ from Voice_Processing.stt import STT
 from Object_Detection.yolo import YoloModel
 from Object_Detection.realsense import ImgNode
 from Robot_Control.robot_control import RobotController 
+from od_msg.srv import SrvDepthPosition
 
 
 class MainController(Node):
@@ -60,6 +61,7 @@ class MainController(Node):
         self.yolo = YoloModel()                # 객체 탐지
         self.img_node = ImgNode()               # 카메라 데이터
         self.robot = RobotController()         # 로봇 컨트롤
+        
 
     def process(self):
         self.get_logger().info("시스템 안정화 중 (2초)...")
@@ -99,11 +101,19 @@ class MainController(Node):
                 if user_speech:
                     # 단계 2-2: GetKeyword의 extract_keyword 메서드를 호출하여 리스트 추출
                     # "bottle을 pos1에 둬" -> ['bottle', 'pos1'] 반환
-                    target_list = self.keyword_extractor.extract_keyword(user_speech)
-                    # objects, targets = self.keyword_extractor.extract_keyword(user_speech)
-                    
-                    if target_list and len(target_list) > 0:
-                        target_name = target_list[0] # 첫 번째 타겟 물체 선택
+                    # target_list = self.keyword_extractor.extract_keyword(user_speech)
+                    objects, targets = self.keyword_extractor.extract_keyword(user_speech)
+                    if not objects:
+                        self.get_logger().warn("no keywords for object detection")
+                        continue
+                    # target 없는 경우, 기본 pos1로 채움
+                    if len(targets) < len(objects):
+                        targets += ["pos1"] * (len(objects) - len(targets))
+
+                    for obj, pos in zip(objects, targets):
+
+                        target_name = obj # 첫 번째 타겟 물체 선택
+                        target_pos = pos
                         self.get_logger().info(f"추출된 키워드: {target_name}. 탐지를 시작합니다.")
                         
                         # 단계 3: YOLO 객체 탐지
@@ -124,10 +134,17 @@ class MainController(Node):
                             self.robot.pick_up(target_pose)
 
                             time.sleep(0.5)
+
+                            if target_pos not in position_map:
+                                self.get_logger().warn(f"{target_pos} 위치 정보 없음 → pos1 사용")
+                                target_pos = "pos1"
                             
                             # 단계 5: place
-                            place_pose = position_map["pos1"]   # test
-                            self.get_logger().info(f"{target_list[1]} 위치로 이동")
+                            # place_pose = position_map[target_pos[i]]   # test
+                            # self.get_logger().info(f"{target_pos[i]} 위치로 이동")
+                            place_pose = position_map[target_pos]
+                            self.get_logger().info(f"{target_pos} 위치로 이동")
+
                             self.robot.move_to(place_pose)
 
                             self.robot.release()
@@ -136,8 +153,8 @@ class MainController(Node):
                             self.get_logger().info("작업 완료! 다시 대기합니다.")
                         else:
                             self.get_logger().warn(f"'{target_name}'을 화면에서 찾을 수 없습니다.")
-                    else:
-                        self.get_logger().warn("문장에서 유효한 도구 이름을 찾지 못했습니다.")
+                    # else:
+                    #     self.get_logger().warn("문장에서 유효한 도구 이름을 찾지 못했습니다.")
                 else:
                     self.get_logger().warn("음성이 인식되지 않았습니다.")
             

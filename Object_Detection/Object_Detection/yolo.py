@@ -13,7 +13,7 @@ import numpy as np
 PACKAGE_NAME = "Object_Detection"
 PACKAGE_PATH = get_package_share_directory(PACKAGE_NAME)
 
-YOLO_MODEL_FILENAME = "best_yolov8_epoch100.pt" # best_yolov26_epoch100.pt
+YOLO_MODEL_FILENAME = "best_yolov26_epoch100.pt" # best_yolov26_epoch100.pt
 YOLO_CLASS_NAME_JSON = "class_name_tool.json"
 
 YOLO_MODEL_PATH = os.path.join(PACKAGE_PATH, "resource", YOLO_MODEL_FILENAME)
